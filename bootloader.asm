@@ -69,7 +69,7 @@ setup_y_print:
 print_y_message_loop:
     MOV AL, [SI]
     CMP AL, 0
-    JE done     ; kernel loading
+    JE setup_stub_print
     INT 0x10
     INC SI
     JMP print_y_message_loop
@@ -81,7 +81,7 @@ setup_n_print:
 print_n_message_loop:
     MOV AL, [SI]
     CMP AL, 0
-    JE done     ; kernel loading
+    JE done
     INT 0x10
     INC SI
     JMP print_n_message_loop
@@ -98,15 +98,41 @@ print_error_message_loop:
     INC SI
     JMP print_error_message_loop
 
-done:
-    jmp $
+setup_stub_print:
+    MOV SI, stub_message
+    CALL function_double_newline
 
-function_newline:
-    MOV AL, 0x0D
+print_sub_message_loop:
+    MOV AL, [SI]
+    CMP AL, 0
+    JE load_stub
     INT 0x10
-    MOV AL, 0x0A
-    INT 0x10
-    RET
+    INC SI
+    JMP print_sub_message_loop
+
+load_stub:
+    MOV AX, 0x8000
+    MOV ES, AX
+    MOV BX, 0x0000
+
+    MOV AH, 0x02
+    MOV AL, 0x01
+    MOV CH, 0x00
+    MOV CL, 0x02
+    MOV DH, 0x00
+    MOV DL, 0x00    ; Drive, need to chang to HDD
+
+    INT 0x13
+
+    JC disk_error
+
+    JMP 0x8000:0x0000
+
+disk_error:
+    JMP $
+
+done:
+    JMP $
 
 function_double_newline:
     MOV AL, 0x0D
@@ -124,6 +150,7 @@ question_message db 'Boot the system? (Y/N)', 0
 y_message db 'Booting...', 0
 n_message db 'Boot Cancelled.', 0
 error_message db 'Invalid input. Press Y or N.', 0
+stub_message db 'Loading Sector 2...', 0
 
 times 510 - ($ - $$) db 0
 
