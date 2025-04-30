@@ -17,7 +17,20 @@ print_start_message:
     JMP print_start_message
 
 load_kernel:
-    ; Kernel loading logic
+    MOV AH, 0x02
+    MOV AL, 0x01
+    MOV CH, 0x00
+    MOV CL, 0x02
+    MOV DH, 0x00
+    MOV DL, 0x00
+    MOV ES, AX
+    MOV BX, 0x1000
+    INT 0x13
+    JC disk_error
+    JMP 0x1000:0x0000
+
+disk_error:
+    JMP $
 
 done:
     JMP $

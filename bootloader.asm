@@ -120,7 +120,7 @@ load_stub:
     MOV CH, 0x00
     MOV CL, 0x02
     MOV DH, 0x00
-    MOV DL, 0x00    ; Drive, need to chang to HDD
+    MOV DL, 0x00    ; Drive, need to change to HDD
 
     INT 0x13
 
